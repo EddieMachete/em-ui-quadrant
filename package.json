@@ -1,0 +1,30 @@
+{
+  "author": "Eduardo Echeverria @eddiemachete",
+  "dependencies": {},
+  "description": "Quadrant is a tile based web component which allows viewing an image in different levels of detail, while optimizing the download process.",
+  "devDependencies": {
+    "@types/jasmine": "^2.6.0",
+    "@types/polymer": "^1.2.2",
+    "express": "^4.16.2",
+    "jasmine-core": "^2.8.0",
+    "karma": "^1.7.1",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-coverage": "^1.1.1",
+    "karma-jasmine": "^1.1.0",
+    "karma-phantomjs-launcher": "^1.0.4",
+    "karma-typescript": "^3.0.7",
+    "phantomjs": "^2.1.7",
+    "resize-observer-polyfill": "^1.5.0",
+    "typescript": "^2.5.3"
+  },
+  "homepage": "https://www.eddiemachete.com/Article/Show?articleName=QuadrantExample_en",
+  "license": "https://github.com/EddieMachete/em-ui-quadrant/blob/master/LICENSE",
+  "main": "index.html",
+  "name": "em-ui-quadrant",
+  "private": false,
+  "repository": "https://github.com/EddieMachete/em-ui-quadrant.git",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "version": "0.0.1"
+}

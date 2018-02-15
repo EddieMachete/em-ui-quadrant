@@ -1,0 +1,170 @@
+
+<!--
+@license
+Copyright (c) 2018 Eduardo Echeverria. All rights reserved.
+This code may only be used under the MIT license found at https://github.com/EddieMachete/em-ui-quadrant/blob/master/LICENSE
+Author: Eduardo Echeverria @eddiemachete
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html"/>
+<link rel="import" href="em-ui-quadrant-canvas.html"/>
+<dom-module id="em-ui-quadrant">
+    <!-- Optional shadow DOM template -->
+    <template>
+        <style>
+            :host {
+                display: block;
+            }
+
+            .canvas-container {
+                background-color: #E2E2E2;
+                display: flex;
+                flex-direction: column;
+                min-height: 300px;
+                overflow: hidden;
+            }
+
+            em-ui-quadrant-canvas {
+                flex: 1;
+            }
+
+            /*.quadrant .canvas {
+                cursor:move;
+                position: absolute;
+                height: 393px;
+                width: 512px;
+            }
+
+            .quadrant .controls {
+                margin-top: 3px;
+                overflow: hidden;
+            }
+
+            .quadrant .dialog-button {
+                background: url('../Images/popup.gif') no-repeat;
+                border-right: #999 1px solid;
+                cursor: pointer; 
+                float: left;
+                height: 16px;
+                margin-right: 3px;
+                width: 18px;
+            }
+
+            .quadrant .dialog-button:hover {
+                background-position: -18px 0px
+            }
+
+            .quadrant .zoom-button {
+                cursor: pointer;
+                float: left;
+                height: 16px;
+                margin-right: 3px;
+                width: 15px;
+            }
+
+            .quadrant .zoom-button:hover {
+                background-position: -18px 0;
+            }
+
+            .quadrant .large {
+                background: url('../Images/zoom_large.gif') no-repeat;
+            }
+
+            .quadrant .medium {
+                background: url('../Images/zoom_medium.gif') no-repeat;
+            }
+
+            .quadrant .small {
+                background: url('../Images/zoom_small.gif') no-repeat;
+            }
+
+            .quadrant .navigator {
+                border: #999 2px solid;
+                cursor: pointer;
+                float: left;
+                height: 77px;
+                margin-left: 98px;
+                margin-top: 5px;
+                position: absolute;
+                width: 115px;
+                z-index: 1;
+            }
+
+            .quadrant .navigator-button {
+                background-image: url("../Images/navigator.gif");
+                border-left: 1px solid #999999;
+                cursor: pointer;
+                float: left;
+                height: 16px;
+                width: 16px;
+            }
+
+            .quadrant .selected {
+                background-position: -18px 0px;
+                border-bottom: #666 2px solid;
+            }*/
+        </style>
+        <!-- shadow DOM for your element -->
+        <div class="canvas-container">
+            <em-ui-quadrant-canvas image-prefix="{{imagePrefix}}"
+                                   resources-uri="{{resourcesUri}}"
+                                   image-width="{{imageWidth}}"
+                                   image-height="{{imageHeight}}"></em-ui-quadrant-canvas>
+        </div>
+        <div class="navigator" style="visibility: hidden;" data-controller="Quadrant" data-name="Navigator" data-image-folder="Images/" data-image-name="i_s_" data-image-width="800" data-image-height="534"></div>
+        <div class="controls">
+            <div class="dialog-button" title="View in high resolution" onclick="alert('Popup goes here!');"></div>
+            <div class="zoom-button small selected" title="View small size" data-controller="Quadrant" data-name="ZoomLevel" data-image-name="i_s_" data-image-width="800" data-image-height="534"></div>
+            <div class="zoom-button medium" title="View medium size" data-controller="Quadrant" data-name="ZoomLevel" data-image-name="i_m_" data-image-width="1024" data-image-height="684"></div>
+            <div class="zoom-button large" title="View large size" data-controller="Quadrant" data-name="ZoomLevel" data-image-name="i_l_" data-image-width="2048" data-image-height="1367"></div>
+            <div class="navigator-button" title="Navigator" data-controller="Quadrant" data-name="NavigatorButton"></div>
+        </div>
+    </template>
+    <script>
+        /* global Polymer customElements */
+        'use strict';
+        
+        class EmUiQuadrant extends Polymer.Element {
+            static get is() { return 'em-ui-quadrant'; }
+            
+            // Properties for the element's public API
+            static get properties() {
+                return {
+                    resourcesUri: {
+                        type:String,
+                        value:'/'
+                    },
+                    imagePrefix: {
+                        type:String,
+                        value:'i_s_'
+                    },
+                    imageHeight: {
+                        type:Number,
+                        value: 534
+                    },
+                    imageWidth: {
+                        type:Number,
+                        value: 800
+                    },
+                    thumbnail: {
+                        type:String,
+                        value:'finder-thumbnail.jpg'
+                    },
+                    thumbnailheight: {
+                        type:Number,
+                        value: 77
+                    },
+                    thumbnailWidth: {
+                        type:Number,
+                        value: 115
+                    },
+                    fileExtension: {
+                        type: String,
+                        value: '.jpg'
+                    }
+                };
+            }
+        }
+        
+        customElements.define(EmUiQuadrant.is, EmUiQuadrant);
+    </script>
+</dom-module>

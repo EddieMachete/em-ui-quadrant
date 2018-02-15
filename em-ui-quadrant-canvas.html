@@ -1,0 +1,146 @@
+
+<!--
+@license
+Copyright (c) 2018 Eduardo Echeverria. All rights reserved.
+This code may only be used under the MIT license found at https://github.com/EddieMachete/em-ui-quadrant/blob/master/LICENSE
+Author: Eduardo Echeverria @eddiemachete
+-->
+<link rel="import" href="../../bower_components/polymer/polymer.html"/>
+<dom-module id="em-ui-quadrant-canvas">
+    <!-- Optional shadow DOM template -->
+    <template>
+        <style>
+            :host {
+                background-color: aquamarine;
+                display: block;
+                /*min-height: 300px;*/
+                position: relative;
+            }
+        </style>
+        <!-- shadow DOM for your element -->
+        <div id="content"></div>
+    </template>
+    <script>
+        /* global Polymer customElements */
+        'use strict';
+        
+        class EmUiQuadrantCanvas extends Polymer.Element {
+            constructor() {
+                super(...arguments);
+                this.blockSide = 128;
+                this.columnCount = 1;
+                this.rowCount = 1;
+                this.width = 500;
+                this.height = 300;
+                this.blocks = [];
+                this.imageColumnCount = 1;
+                this.imageRowCount = 1;
+                this.index = 0;
+            }
+            static get is() { return 'em-ui-quadrant-canvas'; }
+            static get properties() {
+                return {
+                    resourcesUri: {
+                        type: String,
+                        value: '/'
+                    },
+                    fileExtension: {
+                        type: String,
+                        value: '.jpg'
+                    },
+                    image: {
+                        type: String,
+                        value: ''
+                    },
+                    imageHeight: {
+                        type: Number,
+                        value: 320
+                    },
+                    imageWidth: {
+                        type: Number,
+                        value: 520
+                    }
+                };
+            }
+            ready() {
+                super.ready();
+                const resizeObserver = new ResizeObserver((entries, observer) => this.onResize(entries, observer));
+                resizeObserver.observe(this);
+            }
+            initializeCanvas(width, height) {
+                this.width = width;
+                this.height = height;
+                this.updateImageColumnsAndRows(this.imageWidth, this.imageHeight);
+                this.updateBlocks();
+                this.refreshImage();
+            }
+            updateImageColumnsAndRows(imageWidth, imageHeight) {
+                this.imageColumnCount = Math.ceil(imageWidth / this.blockSide);
+                this.imageRowCount = Math.ceil(imageHeight / this.blockSide);
+            }
+            updateBlocks() {
+                this.columnCount = Math.ceil(this.width / this.blockSide) + 1;
+                this.rowCount = Math.ceil(this.height / this.blockSide) + 1;
+                const blockCount = this.columnCount * this.rowCount;
+                const difference = blockCount - this.blocks.length;
+                let current = 0;
+                for (let i = 0; i < this.rowCount; i++) {
+                    for (let j = 0; j < this.columnCount; j++) {
+                        if (current < this.blocks.length) {
+                            var block = this.blocks[current];
+                            block.style.left = (j * this.blockSide) + 'px';
+                            block.style.top = (i * this.blockSide) + 'px';
+                        }
+                        else {
+                            this.addBlock(j * this.blockSide, i * this.blockSide);
+                        }
+                        current++;
+                    }
+                }
+                for (let i = difference; i < 0; i++) {
+                    this.removeBlock();
+                }
+            }
+            refreshImage() {
+                let index = this.index;
+                console.log(this.index);
+                const leap = this.imageColumnCount - this.columnCount;
+                let currentColumn = 0;
+                for (let i = 0; i < this.blocks.length; i++) {
+                    index++;
+                    currentColumn++;
+                    this.blocks[i].setAttribute('src', `${this.resourcesUri}${this.imagePrefix}${index}${this.fileExtension}`);
+                    if (currentColumn == this.columnCount) {
+                        currentColumn = 0;
+                        index += leap;
+                    }
+                }
+            }
+            addBlock(x, y) {
+                const block = document.createElement('img');
+                block.style.width = this.blockSide + 'px';
+                block.style.height = this.blockSide + 'px';
+                block.style.position = 'absolute';
+                block.style.left = x + 'px';
+                block.style.top = y + 'px';
+                block.onload = () => { this.style.visibility = 'visible'; };
+                this.blocks.push(block);
+                this.$.content.appendChild(block);
+            }
+            removeBlock() {
+                const block = this.blocks.pop();
+                this.$.content.removeChild(block);
+            }
+            onResize(entries, observer) {
+                for (const entry of entries) {
+                    if (entry.target.tagName.toUpperCase() === 'EM-UI-QUADRANT-CANVAS') {
+                        const cs = window.getComputedStyle(entry.target);
+                        this.initializeCanvas(parseInt(cs.width.replace(/px/g, '')), parseInt(cs.height.replace(/px/g, '')));
+                    }
+                }
+            }
+        }
+        
+        customElements.define(EmUiQuadrantCanvas.is, EmUiQuadrantCanvas);
+    </script>
+</dom-module>

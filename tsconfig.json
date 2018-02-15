@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "declaration": true,
+        "lib": [
+          "dom",
+          "es6",
+          "scripthost"
+        ],
+        "module": "es6",
+        "moduleResolution": "node",
+        "noEmitOnError": true,
+        "noImplicitAny": false,
+        "outDir": "./dist",
+        "removeComments": true,
+        "sourceMap": false,
+        "target": "es6"
+    },
+    "files": [
+        "./index.ts"
+    ]
+}

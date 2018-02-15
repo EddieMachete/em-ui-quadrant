@@ -1,0 +1,26 @@
+{
+  "authors": [
+    "Eduardo Echeverria @eddiemachete"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^2.0.1",
+    "webcomponentsjs": "webcomponents/webcomponentsjs#^1.0.0-rc.4",
+    "iron-resizable-behavior": "PolymerElements/iron-resizable-behavior#^2.0.1"
+  },
+  "description": "Quadrant is a tile based web component which allows viewing an image in different levels of detail, while optimizing the download process.",
+  "devDependencies": {
+    "iron-component-page": "PolymerElements/iron-component-page#^3.0.1",
+    "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^2.0.0"
+  },
+  "homepage": "https://www.eddiemachete.com/Article/Show?articleName=QuadrantExample_en",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "license": "MIT",
+  "name": "em-ui-quadrant",
+  "version": "0.0.1"
+}
