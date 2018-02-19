@@ -6,6 +6,8 @@ This code may only be used under the MIT license found at https://github.com/Edd
 Author: Eduardo Echeverria @eddiemachete
 -->
 <link rel="import" href="../../bower_components/polymer/polymer.html"/>
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/polymer/lib/mixins/gesture-event-listeners.html">
 <link rel="import" href="em-ui-quadrant-canvas.html"/>
 <dom-module id="em-ui-quadrant">
     <!-- Optional shadow DOM template -->
@@ -104,11 +106,14 @@ Author: Eduardo Echeverria @eddiemachete
             }*/
         </style>
         <!-- shadow DOM for your element -->
-        <div class="canvas-container">
-            <em-ui-quadrant-canvas image-prefix="{{imagePrefix}}"
+        <div class="canvas-container" on-track="handleTrack">
+            <em-ui-quadrant-canvas id="canvas"
+                                   image-prefix="{{imagePrefix}}"
                                    resources-uri="{{resourcesUri}}"
                                    image-width="{{imageWidth}}"
-                                   image-height="{{imageHeight}}"></em-ui-quadrant-canvas>
+                                   image-height="{{imageHeight}}"
+                                   x="{{x}}"
+                                   y="{{y}}"></em-ui-quadrant-canvas>
         </div>
         <div class="navigator" style="visibility: hidden;" data-controller="Quadrant" data-name="Navigator" data-image-folder="Images/" data-image-name="i_s_" data-image-width="800" data-image-height="534"></div>
         <div class="controls">
@@ -123,38 +128,45 @@ Author: Eduardo Echeverria @eddiemachete
         /* global Polymer customElements */
         'use strict';
         
-        class EmUiQuadrant extends Polymer.Element {
+        class EmUiQuadrant extends Polymer.GestureEventListeners(Polymer.Element) {
+            constructor() {
+                super(...arguments);
+                this.x = 0;
+                this.y = 0;
+                this.limitX = 256;
+                this.limitY = 256;
+                this.imageWidth = 256;
+                this.imageHeight = 256;
+            }
             static get is() { return 'em-ui-quadrant'; }
-            
-            // Properties for the element's public API
             static get properties() {
                 return {
                     resourcesUri: {
-                        type:String,
-                        value:'/'
+                        type: String,
+                        value: '/'
                     },
                     imagePrefix: {
-                        type:String,
-                        value:'i_s_'
+                        type: String,
+                        value: 'i_s_'
                     },
                     imageHeight: {
-                        type:Number,
+                        type: Number,
                         value: 534
                     },
                     imageWidth: {
-                        type:Number,
+                        type: Number,
                         value: 800
                     },
                     thumbnail: {
-                        type:String,
-                        value:'finder-thumbnail.jpg'
+                        type: String,
+                        value: 'finder-thumbnail.jpg'
                     },
                     thumbnailheight: {
-                        type:Number,
+                        type: Number,
                         value: 77
                     },
                     thumbnailWidth: {
-                        type:Number,
+                        type: Number,
                         value: 115
                     },
                     fileExtension: {
@@ -162,6 +174,33 @@ Author: Eduardo Echeverria @eddiemachete
                         value: '.jpg'
                     }
                 };
+            }
+            ready() {
+                super.ready();
+                this.updateLimits();
+            }
+            
+            updateLimits() {
+                this.limitX = this.imageWidth - this.$.canvas.clientWidth;
+                this.limitY = this.imageHeight - this.$.canvas.clientHeight;
+            }
+            handleTrack(e) {
+                let x = e.detail.ddx ? this.x - e.detail.ddx : this.x;
+                let y = e.detail.ddy ? this.y - e.detail.ddy : this.y;
+                if (x < 0) {
+                    x = 0;
+                }
+                else if (x > this.limitX) {
+                    x = this.limitX;
+                }
+                if (y < 0) {
+                    y = 0;
+                }
+                else if (y > this.limitY) {
+                    y = this.limitY;
+                }
+                this.x = x;
+                this.y = y;
             }
         }
         

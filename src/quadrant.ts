@@ -7,6 +7,59 @@ Author: Eduardo Echeverria @eddiemachete
 'use strict';
 
 export class Quadrant {
+    
+    // ToDo: Remove
+    private $:any;
+    public x:number = 0;
+    public y:number = 0;
+    private limitX:number = 256;
+    private limitY:number = 256;
+
+    public imageWidth:number = 256;
+    public imageHeight:number = 256;
+
+    public static get is():string { return 'em-ui-quadrant'; }
+
+    public static get properties():any {
+        return {
+            resourcesUri: {
+                type:String,
+                value:'/'
+            },
+            imagePrefix: {
+                type:String,
+                value:'i_s_'
+            },
+            imageHeight: {
+                type:Number,
+                value: 534
+            },
+            imageWidth: {
+                type:Number,
+                value: 800
+            },
+            thumbnail: {
+                type:String,
+                value:'finder-thumbnail.jpg'
+            },
+            thumbnailheight: {
+                type:Number,
+                value: 77
+            },
+            thumbnailWidth: {
+                type:Number,
+                value: 115
+            },
+            fileExtension: {
+                type: String,
+                value: '.jpg'
+            }
+        };
+    }
+
+    ready() {
+        //super.ready();
+    
 
 //     // Get the initial image name used to locate the tiles to initialize the component
 //     imageName = this.View.getAttribute('data-image-name');
@@ -72,11 +125,11 @@ export class Quadrant {
 //     if (navigatorButton)
 //         navigatorButton.onclick = function (e) { return that.NavigatorButton_OnClick(e); };
 
-//     this.UpdateLimits();
+        this.updateLimits();
 
 //     if (this.Navigator)
 //         this.Navigator.ResizeFinder(Math.floor(this.ViewModel.GetThumbnailWidth() * this.Canvas.View.clientWidth / this.ViewModel.GetWidth()), Math.floor(this.ViewModel.GetThumbnailHeight() * this.Canvas.View.clientHeight / this.ViewModel.GetHeight()));
-// };
+    }
 
 // sci.quadrant.QuadrantController.prototype.GetAllElementsInTargetMatching = function (target, attribute, match) {
 //     var matchingElements = [];
@@ -116,10 +169,10 @@ export class Quadrant {
 //         this.SelectedZoomLevelElement = target;
 // };
 
-// sci.quadrant.QuadrantController.prototype.UpdateLimits = function () {
-//     this.LimitX = this.ViewModel.GetWidth() - this.Canvas.View.clientWidth;
-//     this.LimitY = this.ViewModel.GetHeight() - this.Canvas.View.clientHeight;
-// };
+private updateLimits():void {
+    this.limitX = this.imageWidth - this.$.canvas.clientWidth;
+    this.limitY = this.imageHeight - this.$.canvas.clientHeight;
+}
 
 // sci.quadrant.QuadrantController.prototype.GetMouseLocation = function (e) {
 //     // /*IE uses srcElement, others use target*/ var target = e.target != null ? e.target : e.srcElement;
@@ -214,9 +267,12 @@ export class Quadrant {
 // }
 
 // sci.quadrant.QuadrantController.prototype.Body_OnMouseMove = function (e) {
+    private handleTrack(e) {
 //     if (this.DragType === 0)
 //         return true;
 
+        let x = e.detail.ddx ? this.x - e.detail.ddx : this.x;
+        let y = e.detail.ddy ? this.y - e.detail.ddy : this.y;
 //     var location = this.GetMouseLocation(e);
 //     var x;
 //     var y;
@@ -232,13 +288,16 @@ export class Quadrant {
 //         y = Math.round((location.Y - this.Navigator.GetView().offsetTop - this.Navigator.FinderHeight / 2) * this.ViewModel.GetHeight() / this.ViewModel.GetThumbnailHeight());
 //     }
 
-//     if (x < 0) { x = 0; }
-//     else if (x > this.LimitX) { x = this.LimitX; }
+     if (x < 0) { x = 0; }
+     else if (x > this.limitX) { x = this.limitX; }
 
-//     if (y < 0) { y = 0; }
-//     else if (y > this.LimitY) { y = this.LimitY; }
+     if (y < 0) { y = 0; }
+     else if (y > this.limitY) { y = this.limitY; }
 
+     this.x = x;
+     this.y = y;
 //     this.ViewModel.SetLocation(x, y);
 
 //     return false;
+    }
 }

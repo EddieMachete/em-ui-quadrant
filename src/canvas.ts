@@ -20,14 +20,24 @@ export class Canvas extends HTMLElement {
     private imageColumnCount:number = 1;
     private imageRowCount:number = 1;
     private index:number = 0; // Current position on the image (top/left corner)
+    private limitLeft:number = 0;
+    private limitRight:number = 256;
+    private limitTop:number = 0;
+    private limitBottom:number = 256;
+
+    private previousXPos:number = 0;
+    private previousYPos:number = 0;
+    //private constantList:string = '';
     
     // ToDo: Remove
     private $:any;
     public imagePrefix:string;
-    public imageWidth:number;
-    public imageHeight:number;
+    public imageWidth:number = 256;
+    public imageHeight:number = 256;
     public resourcesUri:string;
     public fileExtension:string;
+    public x:number = 0;
+    public y:number = 0;
 
 
     public static get is():string { return 'em-ui-quadrant-canvas'; }
@@ -48,11 +58,21 @@ export class Canvas extends HTMLElement {
             },
             imageHeight: {
                 type:Number,
-                value: 320
+                value: 256
             },
             imageWidth: {
                 type:Number,
-                value: 520
+                value: 256
+            },
+            x: {
+                type:Number,
+                value: 0,
+                observer: 'xChanged'
+            },
+            y: {
+                type:Number,
+                value: 0,
+                observer: 'yChanged'
             }
         }
     }
@@ -68,12 +88,7 @@ export class Canvas extends HTMLElement {
         resizeObserver.observe(this);
     }
 
-//     this.View.style.clip = 'rect(0px ' + this.View.clientWidth + 'px ' + this.View.clientHeight + 'px 0px)'; /*Top Right Bottom Left*/
 
-
-//     this.PreviousX = 0;
-//     this.PreviousY = 0;
-//     this.ConstantList = '';
 
 
 //     this.Canvas = document.createElement('div');
@@ -84,7 +99,6 @@ export class Canvas extends HTMLElement {
 
 //     this.LimitTop = 0;
 //     this.LimitBottom = this.View.clientWidth + this.BlockSide;
-//     this.LimitLeft = 0;
 //     this.LimitRight = this.View.clientHeight + this.BlockSide;
 
 //     if (viewModel)
@@ -124,10 +138,9 @@ export class Canvas extends HTMLElement {
     //         this.View.style.height = h + 'px';
     //     }
 
-    //     this.LimitRight = this.ViewModel.GetWidth() - w;
-    //     this.LimitBottom = this.ViewModel.GetHeight() - this.View.clientHeight;
+        this.limitRight = this.imageWidth - this.width;
+        this.limitBottom = this.imageHeight - this.height;
         this.updateImageColumnsAndRows(this.imageWidth, this.imageHeight);
-    //     this.InitializeColumnsAndRows(w, h);
         this.updateBlocks();
         this.refreshImage();
     }
@@ -136,10 +149,6 @@ export class Canvas extends HTMLElement {
         this.imageColumnCount = Math.ceil(imageWidth / this.blockSide);
         this.imageRowCount = Math.ceil(imageHeight / this.blockSide);
     }
-
-// sci.quadrant.CanvasController.prototype.InitializeColumnsAndRows = function (w, h) {
-//     
-// };
 
     private updateBlocks():void {
         this.columnCount = Math.ceil(this.width / this.blockSide) + 1;
@@ -172,14 +181,21 @@ export class Canvas extends HTMLElement {
         const leap:number = this.imageColumnCount - this.columnCount;
         let currentColumn:number = 0;
 
+        // Based on the image dimensions, the total image blocks available should be:
+        const totalBlocksAvailable:number = this.imageColumnCount * this.imageRowCount;
+
         for (let i:number = 0; i < this.blocks.length; i++) {
             index++;
             currentColumn++;
 
-//         if (this.ConstantList.indexOf(',' + i + ',') == -1) {
-//             this.Blocks[i].style.visibility = 'hidden';
-            this.blocks[i].setAttribute('src', `${this.resourcesUri}${this.imagePrefix}${index}${this.fileExtension}`);
-//         }
+            //if (currentColumn < this.imageColumnCount) {
+            if (index < totalBlocksAvailable) {
+                this.blocks[i].setAttribute('src', `${this.resourcesUri}${this.imagePrefix}${index}${this.fileExtension}`);
+                this.blocks[i].style.visibility = 'visible';
+            } else {
+                // These blocks are out of range
+                this.blocks[i].style.visibility = 'hidden';
+            }
 
             if (currentColumn == this.columnCount) {
                 currentColumn = 0;
@@ -197,6 +213,7 @@ export class Canvas extends HTMLElement {
         block.style.position = 'absolute';
         block.style.left = x + 'px';
         block.style.top = y + 'px';
+        block.draggable = false;
         block.onload = () => { this.style.visibility = 'visible'; };
         this.blocks.push(block);
         this.$.content.appendChild(block);
@@ -211,13 +228,8 @@ export class Canvas extends HTMLElement {
         for (const entry of entries) {
             if (entry.target.tagName.toUpperCase() === 'EM-UI-QUADRANT-CANVAS') {
                 const cs = window.getComputedStyle(entry.target);
-                //console.log(entry.contentRect.top,' is ', cs.paddingTop);
-                //console.log(entry.contentRect.left,' is ', cs.paddingLeft);
                 this.initializeCanvas(parseInt(cs.width.replace(/px/g, '')), parseInt(cs.height.replace(/px/g, '')));
             }
-
-            //if (entry.target.handleResize)
-            //    entry.target.handleResize(entry);
         }
     }
 
@@ -239,86 +251,97 @@ export class Canvas extends HTMLElement {
 //     this.refreshImage();
 // };
 
-// sci.quadrant.CanvasController.prototype.ViewModel_LocationChange = function (e) {
+private xChanged(newValue:number, oldValue:number) {
+    this.locationChanged(this.x, this.y);
+}
+
+private yChanged(newValue:number, oldValue:number) {
+    this.locationChanged(this.x, this.y);
+}
+
+private locationChanged(x:number, y:number) {
 //     this.ConstantList = ',';
 //     //showRed = true;
 
-//     var x = e.X;
-//     if (x < this.LimitLeft) { x = this.LimitLeft; }
-//     else if (x > this.LimitRight) { x = this.LimitRight; }
+    if (x < this.limitLeft) { x = this.limitLeft; }
+    else if (x > this.limitRight) { x = this.limitRight; }
 
-//     var c = Math.floor(x / this.BlockSide);
-//     var xDif = c - this.PreviousX;
-//     x = x % this.BlockSide;
+    const startingColumn:number = Math.floor(x / this.blockSide);
+    let xDif:number = startingColumn - this.previousXPos;
+    const xPos:number = x % this.blockSide;
 
-//     var y = e.Y;
-//     if (y < this.LimitTop) { y = this.LimitTop; }
-//     else if (y > this.LimitBottom) { y = this.LimitBottom; }
+    if (y < this.limitTop) { y = this.limitTop; }
+    else if (y > this.limitBottom) { y = this.limitBottom; }
 
-//     var r = Math.floor(y / this.BlockSide);
-//     var yDif = r - this.PreviousY;
-//     y = y % this.BlockSide;
+    const startingRow:number = Math.floor(y / this.blockSide);
+    const yDif:number = startingRow - this.previousYPos;
+    const yPos:number = y % this.blockSide;
 
 
-//     if (Math.abs(yDif) < this.Rows && Math.abs(xDif) < this.Columns && (xDif + yDif) != 0) {
-//         var down = yDif < 0;
-//         var right = xDif < 0;
-//         var rEnd = (down) ? (yDif + this.Rows) * this.Columns : yDif * this.Columns;
-//         for (var i = 0; i < rEnd; i++) { this.Blocks.push(this.Blocks.shift()); }
+    if (Math.abs(yDif) < this.rowCount && Math.abs(xDif) < this.columnCount && (xDif + yDif) !== 0) {
+        const movedDown:boolean = yDif < 0;
+        const movedRight = xDif < 0;
+        const lastRow = (movedDown) ? (yDif + this.rowCount) * this.columnCount : yDif * this.columnCount;
 
-//         if (right) { xDif += this.Columns; }
-//         var cStart = (down) ? this.Blocks.length - rEnd : 0;
-//         var cEnd = (down) ? this.Blocks.length : this.Blocks.length - rEnd;
-//         var p1 = cStart + xDif;
-//         var p3 = cStart + this.Columns - 1;
-//         var p2 = p3 - xDif;
-//         var temp = new Array();
+        // Swap blocks to create the illusion of endless scrolling
+        for (let i:number = 0; i < lastRow; i++) { this.blocks.push(this.blocks.shift()); }
 
-//         for (var i = cStart; i < cEnd; i++) {
-//             if (i < p1) {
-//                 temp.push(this.Blocks[i]);
+        if (movedRight) { xDif += this.columnCount; }
+        const firstColumn:number = (movedDown) ? this.blocks.length - lastRow : 0;
+        const lastColumn:number = (movedDown) ? this.blocks.length : this.blocks.length - lastRow;
 
-//             }
-//             else {
-//                 this.Blocks[i - xDif] = this.Blocks[i];
-//                 if (!right) { this.ConstantList += (i - xDif) + ','; }
-//             }
+        let p1:number = firstColumn + xDif;
+        let p3:number = firstColumn + this.columnCount - 1;
+        let p2:number = p3 - xDif;
+        const temp:HTMLElement[] = [];
 
-//             if (i > p2) {
-//                 this.Blocks[i] = temp.shift();
-//                 if (right) { this.ConstantList += i + ','; }
-//             }
+        for (let i:number = firstColumn; i < lastColumn; i++) {
+            if (i < p1) {
+                temp.push(this.blocks[i]);
+            }
+            else {
+                this.blocks[i - xDif] = this.blocks[i];
+                //if (!movedRight) { this.constantList += (i - xDif) + ','; }
+            }
 
-//             if (i == p3) {
-//                 p1 += this.Columns;
-//                 p2 += this.Columns;
-//                 p3 += this.Columns;
-//             }
-//         }
-//     }
-//     else { /*alert('UPDATE ALL');*/ }
+            if (i > p2) {
+                this.blocks[i] = temp.shift();
+                //if (movedRight) { this.constantList += i + ','; }
+            }
 
-//     this.PreviousY = r;
-//     this.PreviousX = c;
+            if (i == p3) {
+                p1 += this.columnCount;
+                p2 += this.columnCount;
+                p3 += this.columnCount;
+            }
+        }
+    }
+    else { /*alert('UPDATE ALL');*/ }
 
-//     var current = 0;
+    this.previousYPos = startingRow;
+    this.previousXPos = startingColumn;
 
-//     for (var i = 0; i < this.Rows; i++) {
-//         for (var j = 0; j < this.Columns; j++) {
-//             this.Blocks[current].style.left = parseFloat(j * this.BlockSide - x) + 'px';
-//             this.Blocks[current].style.top = parseFloat(i * this.BlockSide - y) + 'px';
-//             current++;
-//         }
-//     }
+    let current = 0;
 
-//     var ix = this.imageColumnCount * this.PreviousY + this.PreviousX;
+    for (let i:number = 0; i < this.rowCount; i++) {
+        for (let j:number = 0; j < this.columnCount; j++) {
+            if (current < this.blocks.length) {
+                this.blocks[current].style.left = `${(j * this.blockSide - xPos)}px`;
+                this.blocks[current].style.top = `${(i * this.blockSide - yPos)}px`;
+            }
 
-//     if (this.Index === ix)
-//         return;
+            current++;
+        }
+    }
 
-//     this.Index = ix;
-//     this.refreshImage();
+    const index:number = this.imageColumnCount * this.previousYPos + this.previousXPos;
 
+    if (this.index === index)
+        return;
+
+    this.index = index;
+    this.refreshImage();
+}
 
 
 

@@ -36,6 +36,16 @@ Author: Eduardo Echeverria @eddiemachete
                 this.imageColumnCount = 1;
                 this.imageRowCount = 1;
                 this.index = 0;
+                this.limitLeft = 0;
+                this.limitRight = 256;
+                this.limitTop = 0;
+                this.limitBottom = 256;
+                this.previousXPos = 0;
+                this.previousYPos = 0;
+                this.imageWidth = 256;
+                this.imageHeight = 256;
+                this.x = 0;
+                this.y = 0;
             }
             static get is() { return 'em-ui-quadrant-canvas'; }
             static get properties() {
@@ -48,17 +58,27 @@ Author: Eduardo Echeverria @eddiemachete
                         type: String,
                         value: '.jpg'
                     },
-                    image: {
+                    imagePrefix: {
                         type: String,
                         value: ''
                     },
                     imageHeight: {
                         type: Number,
-                        value: 320
+                        value: 256
                     },
                     imageWidth: {
                         type: Number,
-                        value: 520
+                        value: 256
+                    },
+                    x: {
+                        type: Number,
+                        value: 0,
+                        observer: 'xChanged'
+                    },
+                    y: {
+                        type: Number,
+                        value: 0,
+                        observer: 'yChanged'
                     }
                 };
             }
@@ -70,6 +90,8 @@ Author: Eduardo Echeverria @eddiemachete
             initializeCanvas(width, height) {
                 this.width = width;
                 this.height = height;
+                this.limitRight = this.imageWidth - this.width;
+                this.limitBottom = this.imageHeight - this.height;
                 this.updateImageColumnsAndRows(this.imageWidth, this.imageHeight);
                 this.updateBlocks();
                 this.refreshImage();
@@ -103,13 +125,18 @@ Author: Eduardo Echeverria @eddiemachete
             }
             refreshImage() {
                 let index = this.index;
-                console.log(this.index);
                 const leap = this.imageColumnCount - this.columnCount;
                 let currentColumn = 0;
                 for (let i = 0; i < this.blocks.length; i++) {
                     index++;
                     currentColumn++;
-                    this.blocks[i].setAttribute('src', `${this.resourcesUri}${this.imagePrefix}${index}${this.fileExtension}`);
+                    if (index <= this.imageColumnCount * this.imageRowCount) {
+                        this.blocks[i].setAttribute('src', `${this.resourcesUri}${this.imagePrefix}${index}${this.fileExtension}`);
+                        this.blocks[i].style.visibility = 'visible';
+                    }
+                    else {
+                        this.blocks[i].style.visibility = 'hidden';
+                    }
                     if (currentColumn == this.columnCount) {
                         currentColumn = 0;
                         index += leap;
@@ -123,6 +150,7 @@ Author: Eduardo Echeverria @eddiemachete
                 block.style.position = 'absolute';
                 block.style.left = x + 'px';
                 block.style.top = y + 'px';
+                block.draggable = false;
                 block.onload = () => { this.style.visibility = 'visible'; };
                 this.blocks.push(block);
                 this.$.content.appendChild(block);
@@ -138,6 +166,83 @@ Author: Eduardo Echeverria @eddiemachete
                         this.initializeCanvas(parseInt(cs.width.replace(/px/g, '')), parseInt(cs.height.replace(/px/g, '')));
                     }
                 }
+            }
+            xChanged(newValue, oldValue) {
+                this.locationChanged(this.x, this.y);
+            }
+            yChanged(newValue, oldValue) {
+                this.locationChanged(this.x, this.y);
+            }
+            locationChanged(x, y) {
+                if (x < this.limitLeft) {
+                    x = this.limitLeft;
+                }
+                else if (x > this.limitRight) {
+                    x = this.limitRight;
+                }
+                const startingColumn = Math.floor(x / this.blockSide);
+                let xDif = startingColumn - this.previousXPos;
+                const xPos = x % this.blockSide;
+                if (y < this.limitTop) {
+                    y = this.limitTop;
+                }
+                else if (y > this.limitBottom) {
+                    y = this.limitBottom;
+                }
+                const startingRow = Math.floor(y / this.blockSide);
+                const yDif = startingRow - this.previousYPos;
+                const yPos = y % this.blockSide;
+                if (Math.abs(yDif) < this.rowCount && Math.abs(xDif) < this.columnCount && (xDif + yDif) !== 0) {
+                    const movedDown = yDif < 0;
+                    const movedRight = xDif < 0;
+                    const lastRow = (movedDown) ? (yDif + this.rowCount) * this.columnCount : yDif * this.columnCount;
+                    for (let i = 0; i < lastRow; i++) {
+                        this.blocks.push(this.blocks.shift());
+                    }
+                    if (movedRight) {
+                        xDif += this.columnCount;
+                    }
+                    const firstColumn = (movedDown) ? this.blocks.length - lastRow : 0;
+                    const lastColumn = (movedDown) ? this.blocks.length : this.blocks.length - lastRow;
+                    let p1 = firstColumn + xDif;
+                    let p3 = firstColumn + this.columnCount - 1;
+                    let p2 = p3 - xDif;
+                    const temp = [];
+                    for (let i = firstColumn; i < lastColumn; i++) {
+                        if (i < p1) {
+                            temp.push(this.blocks[i]);
+                        }
+                        else {
+                            this.blocks[i - xDif] = this.blocks[i];
+                        }
+                        if (i > p2) {
+                            this.blocks[i] = temp.shift();
+                        }
+                        if (i == p3) {
+                            p1 += this.columnCount;
+                            p2 += this.columnCount;
+                            p3 += this.columnCount;
+                        }
+                    }
+                }
+                else { }
+                this.previousYPos = startingRow;
+                this.previousXPos = startingColumn;
+                let current = 0;
+                for (let i = 0; i < this.rowCount; i++) {
+                    for (let j = 0; j < this.columnCount; j++) {
+                        if (current < this.blocks.length) {
+                            this.blocks[current].style.left = `${(j * this.blockSide - xPos)}px`;
+                            this.blocks[current].style.top = `${(i * this.blockSide - yPos)}px`;
+                        }
+                        current++;
+                    }
+                }
+                const index = this.imageColumnCount * this.previousYPos + this.previousXPos;
+                if (this.index === index)
+                    return;
+                this.index = index;
+                this.refreshImage();
             }
         }
         
