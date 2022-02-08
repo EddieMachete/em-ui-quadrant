@@ -1,21 +1,30 @@
 {
-    "compilerOptions": {
-        "declaration": true,
-        "lib": [
-          "dom",
-          "es6",
-          "scripthost"
-        ],
-        "module": "es6",
-        "moduleResolution": "node",
-        "noEmitOnError": true,
-        "noImplicitAny": false,
-        "outDir": "./dist",
-        "removeComments": true,
-        "sourceMap": false,
-        "target": "es6"
-    },
-    "files": [
-        "./index.ts"
-    ]
+  "allowSyntheticDefaultImports": true,
+  "compileOnSave": true,
+  "compilerOptions": {
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "lib": [
+      "dom",
+      "es6",
+      "es2017.object",
+    ],
+    "module": "es6",
+    "moduleResolution": "node",
+    "noEmitOnError": true,
+    "noImplicitAny": false,
+    "removeComments": false,
+    "sourceMap": true,
+    "target": "es6",
+    "paths": {
+      "@em-ui/*": ["src/em-ui/*"],
+    }
+  },
+  "include": [
+    "src/**/*",
+  ],
+  "exclude": [
+    "node_modules",
+  ]
 }

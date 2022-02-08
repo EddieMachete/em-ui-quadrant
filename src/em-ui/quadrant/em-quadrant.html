@@ -13,24 +13,23 @@
         display: block;
         overflow: hidden;
       }
-      
-      .canvas {
-      }
-      
+
+      .canvas {}
+
       .block {
         background-color: red;
         float: left;
         height: 128px;
         width: 128px;
       }
-      
+
       .block div {
         background-color: orange;
         height: 126px;
         margin: 1px;
       }
     </style>
-  
+
     <!-- local DOM for your element -->
     <div id="canvas" class="canvas">
       <template is="dom-repeat" items="{{blocks}}">
@@ -51,13 +50,13 @@
       var _columnCount = 1;
       var _rowCount = 1;
       var _blockSide = 128;
-      
+
       // -- BEGIN POLYMER PROTOTYPE REGISTRATION ---------
       Polymer({
         is: 'em-quadrant',
         properties: {
           blockCount: {
-            type:Number,
+            type: Number,
             notify: true,
             value: 3
           },
@@ -90,38 +89,38 @@
         ],
         ready: ready,
         attached: attached,
-        updateView: function(oldValue, newValue) {
+        updateView: function (oldValue, newValue) {
           console.log('size changed');
         }
         // -- END OF POLYMER PROTOTYPE ---------------
       });
-      
+
       function ready() {
-        this.vm = {width:200, height:0};
+        this.vm = { width: 200, height: 0 };
         //this.vm.height = 51;
         //this.vm.height = 150;
-        
-        
+
+
         // -------------------
-        Object.observe(this.vm, function(changes){
-        
+        Object.observe(this.vm, function (changes) {
+
           // This asynchronous callback runs
-          changes.forEach(function(change) {
-          
+          changes.forEach(function (change) {
+
             // Letting us know what changed
             console.log(change.type, change.name, change.oldValue);
           });
-        
+
         });
         // -----------------
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
         var that = this;
-        setTimeout(function () { 
+        setTimeout(function () {
           console.log('++ ' + that.vm.width);
           that.vm.width = 1000;
           that.greeting = 'greeting changed';
@@ -129,26 +128,26 @@
         }, 1000);
         // end of ready
       }
-      
-      
+
+
       function attached() {
         initializeCanvas.call(this, this.$.canvas.clientWidth, this.$.canvas.clientHeight);
         //this.initializeCanvas(this.$.canvas.clientWidth, this.$.canvas.clientHeight);
       }
-      
+
       function initializeViewModelColumnAndRowCount(width, height) {
         _viewModelColumnCount = Math.ceil(width / _blockSide);
         _viewModelRowCount = Math.ceil(height / _blockSide);
       }
-      
+
       function initializeColumnAndRowCount(width, height) {
         _columnCount = Math.ceil(width / _blockSide) + 1;
         _rowCount = Math.ceil(height / _blockSide) + 1;
       };
-      
+
       function addBlock(x, y) {
         //this.blocks.push({left: x, top: y});
-        this.push('blocks', {left: x, top: y});
+        this.push('blocks', { left: x, top: y });
         // var block = document.createElement('img');
         // block.style.width = this.BlockSide + 'px';
         // block.style.height = this.BlockSide + 'px';
@@ -159,14 +158,14 @@
         // this.blocks.push(block);
         // this.Canvas.appendChild(block);
       }
-      
+
       function initializeBlocks() {
         var blockCount = _columnCount * _rowCount;
         this.blockCount = blockCount;
         var difference = blockCount - this.blocks.length;
 
         if (difference < 0) {
-             alert('TODO: Remove Blocks (MapController.initializeBlocks)');
+          alert('TODO: Remove Blocks (MapController.initializeBlocks)');
         }
         else if (difference > 0) {
           var current = 0;
@@ -179,33 +178,33 @@
                 block.top = i * _blockSide;
               }
               else { addBlock.call(this, j * _blockSide, i * _blockSide); }
-              
+
               current++;
             }
           }
         }
-        
+
         console.log("Block count: " + this.blockCount + ' :: ' + this.blocks.length);
       }
-      
+
       function initializeCanvas(width, height) {
         console.log('initializeCanvas :: ' + width + ' : ' + height);
-        
+
         var w = this.width <= width ? this.width - 1 : width;
         var h = this.height <= height ? this.height - 1 : height;
-        
+
         // if (this.ViewModel.GetWidth() <= w) {
         // w = (this.ViewModel.GetWidth() - 1);
         // this.View.style.width = w + 'px';
         // }
-        
+
         // if (this.ViewModel.GetHeight() <= h) {
         // h = this.ViewModel.GetHeight() - 1;
         // this.View.style.height = h + 'px';
         // }
-        
+
         _limitRight = this.width - w;
-        _limitBottom = this.height- height;
+        _limitBottom = this.height - height;
         initializeViewModelColumnAndRowCount.call(this, this.width, this.height);
         initializeColumnAndRowCount.call(this, w, h);
         initializeBlocks.call(this);
