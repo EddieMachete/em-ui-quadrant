@@ -25,7 +25,7 @@
   "scripts": {
     "_postbuild": "copyfiles assets/**/* build",
     "build": "rollup -c",
-    "demo:docker": "docker build -t quadrant-demo .",
+    "demo:docker": "docker build -t image-viewer-demo .",
     "prebuild": "rimraf ./build",
     "start": "npm run build && http-server build/ -s -c-1 -p 44333"
   },

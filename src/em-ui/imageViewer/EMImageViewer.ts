@@ -1,22 +1,41 @@
 'use strict';
 
-export class EMQuadrant extends HTMLElement {
+export class EMImageViewer extends HTMLElement {
 
   public static get is(): string {
-    return 'em-quadrant';
+    return 'em-image-viewer';
   }
 
   public static get observedAttributes(): string[] {
-    return [];
+    return [
+      'image-height',
+      'image-name',
+      'image-width',
+    ];
   }
 
-  private template = `
+  private template: string = `
     <style>
       :host{
         display: block;
         background-color: red;
       }
+
+      [canvas-container] {
+        background-color: #E2E2E2;
+        display: flex;
+        flex-direction: column;
+        min-height: 300px;
+        overflow: hidden;
+      }
+  
+      em-image-viewer-canvas {
+          flex: 1;
+      }
     </style>
+    <div canvas-container>
+      <em-image-viewer-canvas></em-image-viewer-canvas>
+    </div>
   `;
 
   // ToDo: Remove
@@ -66,6 +85,13 @@ export class EMQuadrant extends HTMLElement {
   //     }
   //   };
   // }
+
+  public constructor() {
+    super();
+
+    const shadowRoot = this.attachShadow({ mode: 'open' });
+    shadowRoot.innerHTML = this.template;
+  }
 
   ready() {
     //super.ready();
@@ -310,6 +336,22 @@ export class EMQuadrant extends HTMLElement {
 
     //     return false;
   }
+
+  public attributeChangedCallback(
+    name: string,
+    oldValue: string,
+    newValue: string,
+    namespace: string,
+  ): void {
+    if (oldValue === newValue) {
+      return;
+    }
+
+    if (name === 'tile-width') {
+      // this.tileWidth = newValue;
+      return;
+    }
+  }
 }
 
-window.customElements.define(EMQuadrant.is, EMQuadrant);
+window.customElements.define(EMImageViewer.is, EMImageViewer);
