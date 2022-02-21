@@ -50,11 +50,18 @@ export class EMImageViewerCanvas extends HTMLElement {
   private template: string = `
     <style>
       :host{
+        background-color: red;
         display: block;
+        overflow: hidden;
       }
 
       [tiles] {
         position: absolute;
+      }
+
+      [tiles] img {
+        border: solid 1px #000;
+        float: left;
       }
     </style>
     <div tiles></div>
@@ -95,6 +102,10 @@ export class EMImageViewerCanvas extends HTMLElement {
   //     }
   // }
 
+  public get imageHeight(): number {
+    return parseInt(this.getAttribute('image-height'));
+  }
+
   public set imageHeight(value: number) {
     this.setAttribute(
       'image-height',
@@ -104,6 +115,10 @@ export class EMImageViewerCanvas extends HTMLElement {
     this.updateTiles();
   }
 
+  public get imageWidth(): number {
+    return parseInt(this.getAttribute('image-width'));
+  }
+
   public set imageWidth(value: number) {
     this.setAttribute(
       'image-width',
@@ -111,6 +126,10 @@ export class EMImageViewerCanvas extends HTMLElement {
     );
 
     this.updateTiles();
+  }
+
+  public get tileWidth(): number {
+    return parseInt(this.getAttribute('tile-width'));
   }
 
   public set tileWidth(value: number) {
@@ -128,14 +147,17 @@ export class EMImageViewerCanvas extends HTMLElement {
     const shadowRoot = this.attachShadow({ mode: 'open' });
     shadowRoot.innerHTML = this.template;
 
+    this.tiles = shadowRoot.querySelector('[tiles]');
+
     this.initializeRequiredAttributes(
       3 * this.DEFAULT_TILE_WIDTH,
       5 * this.DEFAULT_TILE_WIDTH,
       this.DEFAULT_TILE_WIDTH,
     );
 
+    /* ToDo: Figure out ho not to call updateTiles multiple times during initialization */
 
-    this.tiles = shadowRoot.querySelector('[tiles]');
+    this.updateTiles();
   }
 
   /*
@@ -228,29 +250,20 @@ export class EMImageViewerCanvas extends HTMLElement {
   // }
 
   private updateTiles():void {
-  //     this.columnCount = Math.ceil(this.width / this.blockSide) + 1;
-  //     this.rowCount = Math.ceil(this.height / this.blockSide) + 1;
+    const tileWidth: number = this.tileWidth;
+    const columnCount: number = Math.ceil(this.offsetWidth / tileWidth) + 1;
+    const rowCount: number = Math.ceil(this.offsetHeight / tileWidth) + 1;
 
-  //     const blockCount:number = this.columnCount * this.rowCount;
-  //     const difference:number = blockCount - this.blocks.length;
-  //     let current:number = 0;
+    const tileCount: number = columnCount * rowCount;
+    const difference: number = tileCount - this.tiles.childElementCount;
 
-  //     for (let i:number = 0; i < this.rowCount; i++) {
-  //         for (let j:number = 0; j < this.columnCount; j++) {
-  //             if (current < this.blocks.length) {
-  //                 var block = this.blocks[current];
-  //                 block.style.left = (j * this.blockSide) + 'px';
-  //                 block.style.top = (i * this.blockSide) + 'px';
-  //             }
-  //             else { this.addBlock(j * this.blockSide, i * this.blockSide); }
+    const handler: Function = difference > 0
+      ? () => this.addTile(this, 0, 0)
+      : () => this.tiles.removeChild(this.tiles.lastChild);
 
-  //             current++;
-  //         }
-  //     }
-
-  //     for (let i = difference; i < 0; i++) {
-  //         this.removeBlock();
-  //     }
+    while (this.tiles.childElementCount !== tileCount) {
+      handler();
+    }
   }
 
   private refreshImage(): void {
@@ -283,23 +296,22 @@ export class EMImageViewerCanvas extends HTMLElement {
     //this.constantList = '';
   }
 
-  private addBlock(x: number, y: number) {
-    // const block:HTMLElement = document.createElement('img');
-    // block.style.width = this.blockSide + 'px';
-    // block.style.height = this.blockSide + 'px';
-    // block.style.position = 'absolute';
-    // block.style.left = x + 'px';
-    // block.style.top = y + 'px';
-    // block.draggable = false;
-    // block.onload = () => { this.style.visibility = 'visible'; };
-    // this.blocks.push(block);
-    // this.$.content.appendChild(block);
+  private addTile(target: HTMLElement, x: number, y: number) {
+    const tileWidth: number = this.tileWidth;
+    const tile: HTMLElement = document.createElement('img');
+    tile.style.width = `${tileWidth}px`;
+    tile.style.height = `${tileWidth}px`;
+    // tile.style.position = 'absolute';
+    // tile.style.left = x + 'px';
+    // tile.style.top = y + 'px';
+    tile.draggable = false;
+    // tile.onload = () => { this.style.visibility = 'visible'; };
+    this.tiles.appendChild(tile);
   }
 
-  // private removeBlock():void {
-  //     const block:HTMLElement = this.blocks.pop();
-  //     this.$.content.removeChild(block);
-  // }
+  private removeTile(target: HTMLElement):void {
+    target.removeChild(target.lastChild);
+  }
 
   // private onResize(entries:ResizeObserverEntry[], observer:ResizeObserver):void {
   //     for (const entry of entries) {

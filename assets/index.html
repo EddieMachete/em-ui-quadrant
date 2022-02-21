@@ -6,15 +6,15 @@
       name="viewport"
       content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes"
     />
-    <title>Quadrant image viewer :: Demo :: Eddie Machete</title>
-    <meta name="description" content="Quadrant image viewer :: Demo :: Eddie Machete" />
+    <title>em-image-viewer :: Demo</title>
+    <meta name="description" content="em-image-viewer :: Demo" />
     <!-- Add any global styles for body, document, etc. -->
     <style>
       body {
         font-family: var(--theme-font-family, 'Segoe UI',Arial, sans-serif);
       }
 
-      em-quadrant {
+      em-image-viewer-canvas {
         height: 280px;
         width: 360px;
       }
@@ -25,12 +25,11 @@
     <noscript>
       Please enable JavaScript to view this website.
     </noscript>
-    <h1>Quadrant image viewer :: Demo</h1>
-    <em-quadrant></em-quadrant>
-    <script type="text/javascript" src="scripts/bundle.js"></script>
-    <!--<script type="text/javascript">
-      const app = new App();
-      console.log(app);
-    </script>-->
+    <h1>em-image-viewer :: Demo</h1>
+    <em-image-viewer-canvas
+        image-height="1367"
+        image-width="2048"
+        tile-width="128"></em-image-viewer-canvas>
+    <script type="module" src="scripts/bundle.js"></script>
   </body>
 </html>

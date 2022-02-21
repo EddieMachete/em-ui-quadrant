@@ -1,5 +1,7 @@
 'use strict';
 
+import './EMImageViewerCanvas';
+
 export class EMImageViewer extends HTMLElement {
 
   public static get is(): string {
@@ -34,7 +36,10 @@ export class EMImageViewer extends HTMLElement {
       }
     </style>
     <div canvas-container>
-      <em-image-viewer-canvas></em-image-viewer-canvas>
+      <em-image-viewer-canvas
+        image-height="1367"
+        image-width="2048"
+        tile-width="128"></em-image-viewer-canvas>
     </div>
   `;
 
