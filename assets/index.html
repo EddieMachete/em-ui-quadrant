@@ -27,9 +27,38 @@
     </noscript>
     <h1>em-image-viewer :: Demo</h1>
     <em-image-viewer-canvas
+        file-extension="jpg"
         image-height="1367"
+        image-prefix="i_l_"
         image-width="2048"
+        resources-uri="images/tiles/"
         tile-width="128"></em-image-viewer-canvas>
     <script type="module" src="scripts/bundle.js"></script>
+
+    <script type="text/javascript">
+      const canvas = this.document.querySelector('em-image-viewer-canvas');
+      let x = 0;
+
+      this.document.addEventListener(
+        'keypress',
+        (e) => {
+          console.log(e.keyCode);
+
+          if (e.keyCode === 52) {
+            x -= 10;
+            canvas.setLocation(x, 0);
+            return;
+          }
+
+          if (e.keyCode === 54) {
+            x += 10;
+            canvas.setLocation(x, 0);
+            return;
+          }
+
+          // up 56 down 50
+        }
+      );
+    </script>
   </body>
 </html>

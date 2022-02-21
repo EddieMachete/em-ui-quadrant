@@ -15,7 +15,7 @@ export class EMImageViewerCanvas extends HTMLElement {
   // private blocks:HTMLElement[] = [];
   // private imageColumnCount:number = 1;
   // private imageRowCount:number = 1;
-  // private index:number = 0; // Current position on the image (top/left corner)
+  private index: number = 0; // Current position on the image (top/left corner)
   // private limitLeft:number = 0;
   // private limitRight:number = 256;
   // private limitTop:number = 0;
@@ -38,8 +38,11 @@ export class EMImageViewerCanvas extends HTMLElement {
 
   public static get observedAttributes(): string[] {
     return [
+      'file-extension',
       'image-height',
+      'image-prefix',
       'image-width',
+      'resources-uri',
       'tile-width',
     ];
   }
@@ -50,17 +53,19 @@ export class EMImageViewerCanvas extends HTMLElement {
   private template: string = `
     <style>
       :host{
-        background-color: red;
+        background-color: #CCC;
         display: block;
         overflow: hidden;
       }
 
       [tiles] {
+        background-color: rgba(255, 0, 0, .6);
         position: absolute;
+        opacity: .6;
       }
 
       [tiles] img {
-        border: solid 1px #000;
+        box-shadow: inset 0 0 2px #000;
         float: left;
       }
     </style>
@@ -141,6 +146,18 @@ export class EMImageViewerCanvas extends HTMLElement {
     this.updateTiles();
   }
 
+  public get resourcesUri(): string {
+    return this.getAttribute('resources-uri');
+  }
+
+  public get imagePrefix(): string {
+    return this.getAttribute('image-prefix');
+  }
+
+  public get fileExtension(): string {
+    return this.getAttribute('file-extension');
+  }
+
   public constructor() {
     super();
 
@@ -158,6 +175,7 @@ export class EMImageViewerCanvas extends HTMLElement {
     /* ToDo: Figure out ho not to call updateTiles multiple times during initialization */
 
     this.updateTiles();
+    this.refreshImage();
   }
 
   /*
@@ -253,13 +271,14 @@ export class EMImageViewerCanvas extends HTMLElement {
     const tileWidth: number = this.tileWidth;
     const columnCount: number = Math.ceil(this.offsetWidth / tileWidth) + 1;
     const rowCount: number = Math.ceil(this.offsetHeight / tileWidth) + 1;
+    this.tiles.style.width = `${columnCount * tileWidth}px`;
 
     const tileCount: number = columnCount * rowCount;
     const difference: number = tileCount - this.tiles.childElementCount;
 
     const handler: Function = difference > 0
-      ? () => this.addTile(this, 0, 0)
-      : () => this.tiles.removeChild(this.tiles.lastChild);
+      ? () => this.addTile(this.tiles, tileWidth)
+      : () => this.removeTile(this.tiles);
 
     while (this.tiles.childElementCount !== tileCount) {
       handler();
@@ -267,46 +286,48 @@ export class EMImageViewerCanvas extends HTMLElement {
   }
 
   private refreshImage(): void {
-    // let index:number = this.index;
-    // const leap:number = this.imageColumnCount - this.columnCount;
-    // let currentColumn:number = 0;
+    let index: number = this.index;
+    const tileWidth: number = this.tileWidth;
+    const imageColumnCount: number = Math.ceil(this.imageWidth / tileWidth);
+    const imageRowCount: number = Math.ceil(this.imageHeight / tileWidth);
+    const columnCount: number = Math.ceil(this.offsetWidth / tileWidth) + 1;
+    const leap: number = imageColumnCount - columnCount;
+    let currentColumn:number = 0;
 
-    // // Based on the image dimensions, the total image blocks available should be:
-    // const totalBlocksAvailable:number = this.imageColumnCount * this.imageRowCount;
+    // Based on the image dimensions, the total image blocks available should be:
+    const totalBlocksAvailable:number = imageColumnCount * imageRowCount;
 
-    // for (let i:number = 0; i < this.blocks.length; i++) {
-    //     index++;
-    //     currentColumn++;
+    const tiles: HTMLCollection = this.tiles.children;
 
-    //     //if (currentColumn < this.imageColumnCount) {
-    //     if (index < totalBlocksAvailable) {
-    //         this.blocks[i].setAttribute('src', `${this.resourcesUri}${this.imagePrefix}${index}${this.fileExtension}`);
-    //         this.blocks[i].style.visibility = 'visible';
-    //     } else {
-    //         // These blocks are out of range
-    //         this.blocks[i].style.visibility = 'hidden';
-    //     }
+    for (let i:number = 0; i < tiles.length; i++) {
+      index++;
+      currentColumn++;
+      const tile: HTMLElement = tiles[i] as HTMLElement;
 
-    //     if (currentColumn == this.columnCount) {
-    //         currentColumn = 0;
-    //         index += leap;
-    //     }
-    // }
+      //if (currentColumn < this.imageColumnCount) {
+      if (index < totalBlocksAvailable) {
+        tile.setAttribute('src', `${this.resourcesUri}${this.imagePrefix}${index}.${this.fileExtension}`);
+        tile.style.visibility = 'visible';
+      } else {
+        // These blocks are out of range
+        tile.style.visibility = 'hidden';
+      }
+
+      if (currentColumn == columnCount) {
+          currentColumn = 0;
+          index += leap;
+      }
+    }
 
     //this.constantList = '';
   }
 
-  private addTile(target: HTMLElement, x: number, y: number) {
-    const tileWidth: number = this.tileWidth;
+  private addTile(target: HTMLElement, tileWidth: number) {
     const tile: HTMLElement = document.createElement('img');
     tile.style.width = `${tileWidth}px`;
     tile.style.height = `${tileWidth}px`;
-    // tile.style.position = 'absolute';
-    // tile.style.left = x + 'px';
-    // tile.style.top = y + 'px';
     tile.draggable = false;
-    // tile.onload = () => { this.style.visibility = 'visible'; };
-    this.tiles.appendChild(tile);
+    target.appendChild(tile);
   }
 
   private removeTile(target: HTMLElement):void {
@@ -348,10 +369,8 @@ export class EMImageViewerCanvas extends HTMLElement {
   //     this.locationChanged(this.x, this.y);
   // }
 
-  private locationChanged(x: number, y: number) {
-    //     this.ConstantList = ',';
-    //     //showRed = true;
-
+  public setLocation(x: number, y: number) {
+    this.tiles.style.left = `${-x}px`;
     // if (x < this.limitLeft) { x = this.limitLeft; }
     // else if (x > this.limitRight) { x = this.limitRight; }
 
