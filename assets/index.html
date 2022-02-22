@@ -38,6 +38,7 @@
     <script type="text/javascript">
       const canvas = this.document.querySelector('em-image-viewer-canvas');
       let x = 0;
+      let y = 0;
 
       this.document.addEventListener(
         'keypress',
@@ -45,18 +46,28 @@
           console.log(e.keyCode);
 
           if (e.keyCode === 52) {
-            x -= 10;
-            canvas.setLocation(x, 0);
+            x -= 128;
+            canvas.setLocation(x, y);
             return;
           }
 
           if (e.keyCode === 54) {
-            x += 10;
-            canvas.setLocation(x, 0);
+            x += 128;
+            canvas.setLocation(x, y);
             return;
           }
 
-          // up 56 down 50
+          if (e.keyCode === 56) {
+            y -= 128;
+            canvas.setLocation(x, y);
+            return;
+          }
+
+          if (e.keyCode === 50) {
+            y += 128;
+            canvas.setLocation(x, y);
+            return;
+          }
         }
       );
     </script>

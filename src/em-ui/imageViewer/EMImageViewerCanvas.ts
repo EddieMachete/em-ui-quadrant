@@ -370,20 +370,22 @@ export class EMImageViewerCanvas extends HTMLElement {
   // }
 
   public setLocation(x: number, y: number) {
-    this.tiles.style.left = `${-x}px`;
+    const tileWidth: number = this.tileWidth;
+    const imageColumnCount: number = Math.ceil(this.imageWidth / tileWidth);
+
     // if (x < this.limitLeft) { x = this.limitLeft; }
     // else if (x > this.limitRight) { x = this.limitRight; }
 
-    // const startingColumn:number = Math.floor(x / this.blockSide);
+    const startingColumn: number = Math.floor(x / tileWidth);
     // let xDif:number = startingColumn - this.previousXPos;
-    // const xPos:number = x % this.blockSide;
+    // const xPos: number = x % tileWidth;
 
     // if (y < this.limitTop) { y = this.limitTop; }
     // else if (y > this.limitBottom) { y = this.limitBottom; }
 
-    // const startingRow:number = Math.floor(y / this.blockSide);
+    const startingRow: number = Math.floor(y / tileWidth);
     // const yDif:number = startingRow - this.previousYPos;
-    // const yPos:number = y % this.blockSide;
+    // const yPos: number = y % tileWidth;
 
 
     // if (Math.abs(yDif) < this.rowCount && Math.abs(xDif) < this.columnCount && (xDif + yDif) !== 0) {
@@ -434,8 +436,8 @@ export class EMImageViewerCanvas extends HTMLElement {
     // for (let i:number = 0; i < this.rowCount; i++) {
     //     for (let j:number = 0; j < this.columnCount; j++) {
     //         if (current < this.blocks.length) {
-    //             this.blocks[current].style.left = `${(j * this.blockSide - xPos)}px`;
-    //             this.blocks[current].style.top = `${(i * this.blockSide - yPos)}px`;
+    //             this.blocks[current].style.left = `${(j * tileWidth - xPos)}px`;
+    //             this.blocks[current].style.top = `${(i * tileWidth - yPos)}px`;
     //         }
 
     //         current++;
@@ -443,12 +445,14 @@ export class EMImageViewerCanvas extends HTMLElement {
     // }
 
     // const index:number = this.imageColumnCount * this.previousYPos + this.previousXPos;
+    const index: number = imageColumnCount * startingRow + startingColumn;
 
-    // if (this.index === index)
-    //     return;
-
-    // this.index = index;
-    // this.refreshImage();
+    if (this.index === index) {
+      return;
+    }
+    
+    this.index = index;
+    this.refreshImage();
   }
 
 
