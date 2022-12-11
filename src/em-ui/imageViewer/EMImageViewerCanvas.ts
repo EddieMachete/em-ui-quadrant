@@ -16,10 +16,10 @@ export class EMImageViewerCanvas extends HTMLElement {
   // private imageColumnCount:number = 1;
   // private imageRowCount:number = 1;
   private index: number = 0; // Current position on the image (top/left corner)
-  // private limitLeft:number = 0;
-  // private limitRight:number = 256;
-  // private limitTop:number = 0;
-  // private limitBottom:number = 256;
+  private limitLeft:number = 0;
+  private limitRight:number = 256;
+  private limitTop:number = 0;
+  private limitBottom:number = 256;
 
   // private previousXPos:number = 0;
   // private previousYPos:number = 0;
@@ -117,6 +117,7 @@ export class EMImageViewerCanvas extends HTMLElement {
       (isNaN(value) || value < 10 ? 3 * this.DEFAULT_TILE_WIDTH : value).toString(),
     );
 
+    this.updateLimits(this.imageWidth, this.imageHeight);
     this.updateTiles();
   }
 
@@ -130,6 +131,7 @@ export class EMImageViewerCanvas extends HTMLElement {
       (isNaN(value) || value < 10 ? 5 * this.DEFAULT_TILE_WIDTH : value).toString(),
     );
 
+    this.updateLimits(this.imageWidth, this.imageHeight);
     this.updateTiles();
   }
 
@@ -143,6 +145,7 @@ export class EMImageViewerCanvas extends HTMLElement {
       (isNaN(value) || value < 10 ? this.DEFAULT_TILE_WIDTH : value).toString(),
     );
 
+    this.updateLimits(this.imageWidth, this.imageHeight);
     this.updateTiles();
   }
 
@@ -172,8 +175,9 @@ export class EMImageViewerCanvas extends HTMLElement {
       this.DEFAULT_TILE_WIDTH,
     );
 
-    /* ToDo: Figure out ho not to call updateTiles multiple times during initialization */
+    /* ToDo: Figure out how not to call updateTiles multiple times during initialization */
 
+    this.updateLimits(this.imageWidth, this.imageHeight);
     this.updateTiles();
     this.refreshImage();
   }
@@ -241,31 +245,22 @@ export class EMImageViewerCanvas extends HTMLElement {
   // };
 
   private initializeCanvas(width: number, height: number): void {
-    // this.width = width;
-    // this.height = height;
-
-
-    //     if (this.ViewModel.GetWidth() <= w) {
-    //         w = (this.ViewModel.GetWidth() - 1);
-    //         this.View.style.width = w + 'px';
-    //     }
-
-    //     if (this.ViewModel.GetHeight() <= h) {
-    //         h = this.ViewModel.GetHeight() - 1;
-    //         this.View.style.height = h + 'px';
-    //     }
-
-    // this.limitRight = this.imageWidth - this.width;
-    // this.limitBottom = this.imageHeight - this.height;
-    // this.updateImageColumnsAndRows(this.imageWidth, this.imageHeight);
+    this.updateLimits(width, height);
     this.updateTiles();
-    // this.refreshImage();
   }
 
   // private updateImageColumnsAndRows(imageWidth:number, imageHeight:number):void {
   //     this.imageColumnCount = Math.ceil(imageWidth / this.blockSide);
   //     this.imageRowCount = Math.ceil(imageHeight / this.blockSide);
   // }
+
+  private updateLimits(imageWidth: number, imageHeight: number): void {
+    console.log(imageWidth);
+    this.limitLeft = 0;
+    this.limitRight = imageWidth - this.offsetWidth;
+    this.limitTop = 0;
+    this.limitBottom = imageHeight - this.offsetHeight;
+  }
 
   private updateTiles():void {
     const tileWidth: number = this.tileWidth;
@@ -373,17 +368,18 @@ export class EMImageViewerCanvas extends HTMLElement {
     const tileWidth: number = this.tileWidth;
     const imageColumnCount: number = Math.ceil(this.imageWidth / tileWidth);
 
-    // if (x < this.limitLeft) { x = this.limitLeft; }
-    // else if (x > this.limitRight) { x = this.limitRight; }
+    // Ensure that the position does not go below 0 or higher than the image width and height
+    const xPos: number = x < this.limitLeft ? this.limitLeft : x > this.limitRight ? this.limitRight : x;
+    const yPos: number = y < 0 ? 0 : y > this.imageHeight ? this.imageHeight : y;
 
-    const startingColumn: number = Math.floor(x / tileWidth);
+    const startingColumn: number = Math.floor(xPos / tileWidth);
     // let xDif:number = startingColumn - this.previousXPos;
     // const xPos: number = x % tileWidth;
 
     // if (y < this.limitTop) { y = this.limitTop; }
     // else if (y > this.limitBottom) { y = this.limitBottom; }
 
-    const startingRow: number = Math.floor(y / tileWidth);
+    const startingRow: number = Math.floor(yPos / tileWidth);
     // const yDif:number = startingRow - this.previousYPos;
     // const yPos: number = y % tileWidth;
 
@@ -445,7 +441,11 @@ export class EMImageViewerCanvas extends HTMLElement {
     // }
 
     // const index:number = this.imageColumnCount * this.previousYPos + this.previousXPos;
+    this.tiles.style.left = `${-xPos % tileWidth}px`;
+    this.tiles.style.top = `${-yPos % tileWidth}px`;
     const index: number = imageColumnCount * startingRow + startingColumn;
+
+    console.log(index + ' :: ' + xPos);
 
     if (this.index === index) {
       return;
