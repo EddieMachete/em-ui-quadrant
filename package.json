@@ -2,11 +2,14 @@
   "author": "Eduardo Echeverria @eddiemachete",
   "description": "Quadrant is a tile based web component which allows viewing an image in different levels of detail, while optimizing the download process.",
   "devDependencies": {
+    "@esm-bundle/chai": "^4.3.4-fix.0",
     "@rollup/plugin-commonjs": "^21.0.1",
     "@rollup/plugin-node-resolve": "^13.1.3",
     "@rollup/plugin-typescript": "^8.3.0",
     "@typescript-eslint/eslint-plugin": "^5.11.0",
     "@typescript-eslint/parser": "^5.11.0",
+    "@web/test-runner": "^0.15.0",
+    "@web/test-runner-playwright": "^0.9.0",
     "copyfiles": "^2.4.1",
     "cspell": "^5.18.4",
     "eslint": "^8.8.0",
@@ -27,7 +30,8 @@
     "build": "rollup -c",
     "demo:docker": "docker build -t image-viewer-demo .",
     "prebuild": "rimraf ./build",
-    "start": "npm run build && http-server build/ -s -c-1 -p 44333"
+    "start": "npm run build && http-server build/ -s -c-1 -p 44333",
+    "test": "web-test-runner tests/**/*.test.js --node-resolve --playwright --browsers chromium"
   },
   "version": "0.0.2"
 }

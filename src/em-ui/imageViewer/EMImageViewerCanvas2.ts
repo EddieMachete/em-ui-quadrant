@@ -30,6 +30,7 @@ export class EMImageViewerCanvas2 extends HTMLElement {
     <style>
       :host{
         background-color: #CCC;
+        border: solid 1px black;
         display: block;
         overflow: hidden;
       }
@@ -121,11 +122,11 @@ export class EMImageViewerCanvas2 extends HTMLElement {
 
     this.tiles = tiles;
 
-    this.initializeRequiredAttributes(
-      3 * this.DEFAULT_TILE_WIDTH,
-      5 * this.DEFAULT_TILE_WIDTH,
-      this.DEFAULT_TILE_WIDTH,
-    );
+    // this.initializeRequiredAttributes(
+    //   3 * this.DEFAULT_TILE_WIDTH,
+    //   5 * this.DEFAULT_TILE_WIDTH,
+    //   this.DEFAULT_TILE_WIDTH,
+    // );
 
     /* ToDo: Figure out how not to call updateTiles multiple times during initialization */
 
@@ -139,22 +140,21 @@ export class EMImageViewerCanvas2 extends HTMLElement {
    * This is desirable as it centrilizes where the values are, without having to create a redundant private variable.
    * It is also good for accessibility as the values are visible in the HTML itself.
   */
-  private initializeRequiredAttributes(imageHeight: number, imageWidth: number, tileWidth: number): void {
-    if (!this.hasAttribute('image-height')) {
-      this.imageHeight = imageHeight
-    }
+  // private initializeRequiredAttributes(imageHeight: number, imageWidth: number, tileWidth: number): void {
+  //   if (!this.hasAttribute('image-height')) {
+  //     this.imageHeight = imageHeight
+  //   }
 
-    if (!this.hasAttribute('image-width')) {
-      this.imageWidth = imageWidth;
-    }
+  //   if (!this.hasAttribute('image-width')) {
+  //     this.imageWidth = imageWidth;
+  //   }
 
-    if (!this.hasAttribute('tile-width')) {
-      this.tileWidth = tileWidth;
-    }
-  }
+  //   if (!this.hasAttribute('tile-width')) {
+  //     this.tileWidth = tileWidth;
+  //   }
+  // }
 
   private updateLimits(imageWidth: number, imageHeight: number): void {
-    console.log(imageWidth);
     this.limitLeft = 0;
     this.limitRight = imageWidth - this.offsetWidth;
     this.limitTop = 0;
@@ -168,9 +168,11 @@ export class EMImageViewerCanvas2 extends HTMLElement {
   private updateTiles(): void {
     const columnCount: number = Math.ceil(this.offsetWidth / this.tileWidth) + 1;
     const rowCount: number = Math.ceil(this.offsetHeight / this.tileWidth) + 1;
-    this.tiles.style.width = `${columnCount * this.tileWidth}px`;
 
-    console.log(`updateTiles :: ${this.tileWidth} :: rowCount: ${rowCount} :: columnCount: ${columnCount}`);
+    if (!this.tileWidth || !rowCount || !columnCount) {
+      console.log(`updateTiles :: ${this.tileWidth} :: rowCount: ${rowCount} :: columnCount: ${columnCount}`);
+      return;
+    }
 
     for (let i: number = 0; i < rowCount; i++) {
       if (i < this.tiles.childElementCount) {
@@ -201,42 +203,29 @@ export class EMImageViewerCanvas2 extends HTMLElement {
   }
 
   private refreshImage(): void {
-    return;
-
     let index: number = this.index;
-    const tileWidth: number = this.tileWidth;
-    const imageColumnCount: number = Math.ceil(this.imageWidth / tileWidth);
-    const imageRowCount: number = Math.ceil(this.imageHeight / tileWidth);
-    const columnCount: number = Math.ceil(this.offsetWidth / tileWidth) + 1;
+    const imageColumnCount: number = Math.ceil(this.imageWidth / this.tileWidth);
+    const imageRowCount: number = Math.ceil(this.imageHeight / this.tileWidth);
+    const columnCount: number = Math.ceil(this.offsetWidth / this.tileWidth) + 1;
+    const rowCount: number = Math.ceil(this.offsetHeight / this.tileWidth) + 1;
     const leap: number = imageColumnCount - columnCount;
-    let currentColumn:number = 0;
 
-    // Based on the image dimensions, the total image blocks available should be:
-    const totalBlocksAvailable:number = imageColumnCount * imageRowCount;
-
-    const tiles: HTMLCollection = this.tiles.children;
-
-    for (let i:number = 0; i < tiles.length; i++) {
-      index++;
-      currentColumn++;
-      const tile: HTMLElement = tiles[i] as HTMLElement;
-
-      //if (currentColumn < this.imageColumnCount) {
-      if (index < totalBlocksAvailable) {
-        tile.setAttribute('src', `${this.resourcesUri}${this.imagePrefix}${index}.${this.fileExtension}`);
-        tile.style.visibility = 'visible';
-      } else {
-        // These blocks are out of range
-        tile.style.visibility = 'hidden';
-      }
-
-      if (currentColumn == columnCount) {
-          currentColumn = 0;
-          index += leap;
-      }
+    if (!this.imageWidth || !this.imageHeight || !this.tileWidth || !this.offsetHeight || !this.offsetWidth) {
+      return;
     }
 
-    //this.constantList = '';
+    const rows: HTMLCollection = this.tiles.children;
+
+    for (let i=0; i<rows.length; i++) {
+      const tiles = rows[i].children;
+
+      for (let j = 0; j < tiles.length; j++){
+        index++;
+        tiles[j].setAttribute('src', `${this.resourcesUri}${this.imagePrefix}${index}.${this.fileExtension}`);
+      }
+
+      index += leap;
+    }
   }
 
   public setLocation(x: number, y: number) {
@@ -265,11 +254,6 @@ export class EMImageViewerCanvas2 extends HTMLElement {
     this.index = index;
     this.refreshImage();
   }
-
-
-
-
-
 
   public attributeChangedCallback(
     name: string,
