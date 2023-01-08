@@ -14,11 +14,13 @@ export class EMImageViewerCanvas2 extends HTMLElement {
     ];
   }
 
-  private index: number = 0; // Current position on the image (top/left corner)
-  private limitLeft:number = 0;
-  private limitRight:number = 256;
-  private limitTop:number = 0;
-  private limitBottom:number = 256;
+  private index: number = 0; // Current top/left tile
+  private previousStartingColumn: number = 0;
+  private previousStartingRow: number = 0;
+  private limitLeft: number = 0;
+  private limitRight: number = 256;
+  private limitTop: number = 0;
+  private limitBottom: number = 256;
 
   private columns: Array<HTMLElement>[] = [];
   private rows: Array<HTMLElement>[] = [];
@@ -228,6 +230,28 @@ export class EMImageViewerCanvas2 extends HTMLElement {
     }
   }
 
+  private moveFirstColumnToEnd(): void {
+    const rows: HTMLCollection = this.tiles.children;
+
+    for (let i=0; i<rows.length; i++) {
+      const row = rows[i];
+      const tile = row.removeChild(row.firstElementChild);
+      tile.setAttribute('src', '');
+      row.append(tile);
+    }
+  }
+
+  private moveLastColumnToStart(): void {
+    const rows: HTMLCollection = this.tiles.children;
+
+    for (let i=0; i<rows.length; i++) {
+      const row = rows[i];
+      const tile = row.removeChild(row.lastElementChild);
+      tile.setAttribute('src', '');
+      row.prepend(tile);
+    }
+  }
+
   public setLocation(x: number, y: number) {
     const tileWidth: number = this.tileWidth;
     const imageColumnCount: number = Math.ceil(this.imageWidth / tileWidth);
@@ -237,7 +261,6 @@ export class EMImageViewerCanvas2 extends HTMLElement {
     const yPos: number = y < 0 ? 0 : y > this.imageHeight ? this.imageHeight : y;
 
     const startingColumn: number = Math.floor(xPos / tileWidth);
-
     const startingRow: number = Math.floor(yPos / tileWidth);
 
     // const index:number = this.imageColumnCount * this.previousYPos + this.previousXPos;
@@ -251,7 +274,15 @@ export class EMImageViewerCanvas2 extends HTMLElement {
       return;
     }
     
+    if (startingColumn > this.previousStartingColumn) {
+      this.moveFirstColumnToEnd();
+    } else if (startingColumn < this.previousStartingColumn) {
+      this.moveLastColumnToStart();
+    }
+
     this.index = index;
+    this.previousStartingColumn = startingColumn;
+    this.previousStartingRow = startingRow;
     this.refreshImage();
   }
 
