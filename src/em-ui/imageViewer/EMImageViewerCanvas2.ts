@@ -14,11 +14,13 @@ export class EMImageViewerCanvas2 extends HTMLElement {
     ];
   }
 
-  private index: number = 0; // Current position on the image (top/left corner)
-  private limitLeft:number = 0;
-  private limitRight:number = 256;
-  private limitTop:number = 0;
-  private limitBottom:number = 256;
+  private index: number = 0; // Current top/left tile
+  private previousStartingColumn: number = 0;
+  private previousStartingRow: number = 0;
+  private limitLeft: number = 0;
+  private limitRight: number = 256;
+  private limitTop: number = 0;
+  private limitBottom: number = 256;
 
   private columns: Array<HTMLElement>[] = [];
   private rows: Array<HTMLElement>[] = [];
@@ -228,16 +230,68 @@ export class EMImageViewerCanvas2 extends HTMLElement {
     }
   }
 
+  private moveFirstColumnToEnd(): void {
+    const rows = this.tiles.children;
+
+    for (let i=0; i<rows.length; i++) {
+      const row = rows[i];
+      const tile = row.removeChild(row.firstElementChild);
+      tile.setAttribute('src', '');
+      row.append(tile);
+    }
+  }
+
+  private moveLastColumnToStart(): void {
+    const rows = this.tiles.children;
+
+    for (let i=0; i<rows.length; i++) {
+      const row = rows[i];
+      const tile = row.removeChild(row.lastElementChild);
+      tile.setAttribute('src', '');
+      row.prepend(tile);
+    }
+  }
+
+  private clearRowTiles(row: HTMLElement): HTMLElement {
+    const tiles = row.children;
+
+    for (let i=0; i<tiles.length; i++) {
+      const tile = tiles[i];
+      tile.setAttribute('src', '');
+    }
+
+    return row;
+  }
+
+  private moveFirstRowToEnd(): void {
+    if (this.tiles.childElementCount < 2) {
+      return;
+    }
+
+    this.tiles.append(
+      this.clearRowTiles(this.tiles.firstChild as HTMLElement)
+    );
+  }
+
+  private moveLastRowToStart(): void {
+    if (this.tiles.childElementCount < 2) {
+      return;
+    }
+    
+    this.tiles.prepend(
+      this.clearRowTiles(this.tiles.lastChild as HTMLElement)
+    );
+  }
+
   public setLocation(x: number, y: number) {
     const tileWidth: number = this.tileWidth;
     const imageColumnCount: number = Math.ceil(this.imageWidth / tileWidth);
 
     // Ensure that the position does not go below 0 or higher than the image width and height
     const xPos: number = x < this.limitLeft ? this.limitLeft : x > this.limitRight ? this.limitRight : x;
-    const yPos: number = y < 0 ? 0 : y > this.imageHeight ? this.imageHeight : y;
+    const yPos: number = y < this.limitTop ? this.limitTop : y > this.limitBottom ? this.limitBottom : y;
 
     const startingColumn: number = Math.floor(xPos / tileWidth);
-
     const startingRow: number = Math.floor(yPos / tileWidth);
 
     // const index:number = this.imageColumnCount * this.previousYPos + this.previousXPos;
@@ -251,7 +305,21 @@ export class EMImageViewerCanvas2 extends HTMLElement {
       return;
     }
     
+    if (startingColumn > this.previousStartingColumn) {
+      this.moveFirstColumnToEnd();
+    } else if (startingColumn < this.previousStartingColumn) {
+      this.moveLastColumnToStart();
+    }
+
+    if (startingRow > this.previousStartingRow) {
+      this.moveFirstRowToEnd();
+    } else if (startingRow < this.previousStartingRow) {
+      this.moveLastRowToStart();
+    }
+
     this.index = index;
+    this.previousStartingColumn = startingColumn;
+    this.previousStartingRow = startingRow;
     this.refreshImage();
   }
 
@@ -259,7 +327,6 @@ export class EMImageViewerCanvas2 extends HTMLElement {
     name: string,
     oldValue: string,
     newValue: string,
-    namespace: string,
   ): void {
     if (oldValue === newValue) {
       return;
