@@ -231,7 +231,7 @@ export class EMImageViewerCanvas2 extends HTMLElement {
   }
 
   private moveFirstColumnToEnd(): void {
-    const rows: HTMLCollection = this.tiles.children;
+    const rows = this.tiles.children;
 
     for (let i=0; i<rows.length; i++) {
       const row = rows[i];
@@ -242,7 +242,7 @@ export class EMImageViewerCanvas2 extends HTMLElement {
   }
 
   private moveLastColumnToStart(): void {
-    const rows: HTMLCollection = this.tiles.children;
+    const rows = this.tiles.children;
 
     for (let i=0; i<rows.length; i++) {
       const row = rows[i];
@@ -252,13 +252,44 @@ export class EMImageViewerCanvas2 extends HTMLElement {
     }
   }
 
+  private clearRowTiles(row: HTMLElement): HTMLElement {
+    const tiles = row.children;
+
+    for (let i=0; i<tiles.length; i++) {
+      const tile = tiles[i];
+      tile.setAttribute('src', '');
+    }
+
+    return row;
+  }
+
+  private moveFirstRowToEnd(): void {
+    if (this.tiles.childElementCount < 2) {
+      return;
+    }
+
+    this.tiles.append(
+      this.clearRowTiles(this.tiles.firstChild as HTMLElement)
+    );
+  }
+
+  private moveLastRowToStart(): void {
+    if (this.tiles.childElementCount < 2) {
+      return;
+    }
+    
+    this.tiles.prepend(
+      this.clearRowTiles(this.tiles.lastChild as HTMLElement)
+    );
+  }
+
   public setLocation(x: number, y: number) {
     const tileWidth: number = this.tileWidth;
     const imageColumnCount: number = Math.ceil(this.imageWidth / tileWidth);
 
     // Ensure that the position does not go below 0 or higher than the image width and height
     const xPos: number = x < this.limitLeft ? this.limitLeft : x > this.limitRight ? this.limitRight : x;
-    const yPos: number = y < 0 ? 0 : y > this.imageHeight ? this.imageHeight : y;
+    const yPos: number = y < this.limitTop ? this.limitTop : y > this.limitBottom ? this.limitBottom : y;
 
     const startingColumn: number = Math.floor(xPos / tileWidth);
     const startingRow: number = Math.floor(yPos / tileWidth);
@@ -280,6 +311,12 @@ export class EMImageViewerCanvas2 extends HTMLElement {
       this.moveLastColumnToStart();
     }
 
+    if (startingRow > this.previousStartingRow) {
+      this.moveFirstRowToEnd();
+    } else if (startingRow < this.previousStartingRow) {
+      this.moveLastRowToStart();
+    }
+
     this.index = index;
     this.previousStartingColumn = startingColumn;
     this.previousStartingRow = startingRow;
@@ -290,7 +327,6 @@ export class EMImageViewerCanvas2 extends HTMLElement {
     name: string,
     oldValue: string,
     newValue: string,
-    namespace: string,
   ): void {
     if (oldValue === newValue) {
       return;
