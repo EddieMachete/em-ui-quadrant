@@ -15,12 +15,14 @@ export class EMImageViewerCanvas2 extends HTMLElement {
   }
 
   private index: number = 0; // Current top/left tile
+  private tileCount: number = 0;
   private previousStartingColumn: number = 0;
   private previousStartingRow: number = 0;
   private limitLeft: number = 0;
   private limitRight: number = 256;
   private limitTop: number = 0;
   private limitBottom: number = 256;
+  private resizeHandler: (entries: ResizeObserverEntry[], observer: ResizeObserver) => void;
 
   private columns: Array<HTMLElement>[] = [];
   private rows: Array<HTMLElement>[] = [];
@@ -32,9 +34,9 @@ export class EMImageViewerCanvas2 extends HTMLElement {
     <style>
       :host{
         background-color: #CCC;
-        border: solid 1px black;
         display: block;
         overflow: hidden;
+        position: relative;
       }
 
       [tiles] {
@@ -131,12 +133,22 @@ export class EMImageViewerCanvas2 extends HTMLElement {
     // );
 
     /* ToDo: Figure out how not to call updateTiles multiple times during initialization */
+    // this.updateLimits(this.imageWidth, this.imageHeight);
+    // this.updateTiles();
+    // this.refreshImage();
+  }
 
+  public connectedCallback(): void {
+    this.resizeHandler = () => this.onResize();
+    new ResizeObserver(this.resizeHandler).observe(this);
+  }
+
+  private onResize(): void {
+    /* ToDo: Figure out how not to call updateTiles multiple times during initialization */
     this.updateLimits(this.imageWidth, this.imageHeight);
     this.updateTiles();
     this.refreshImage();
   }
-
   /*
    * We want the source of all basic dimensions to be the attributes.
    * This is desirable as it centrilizes where the values are, without having to create a redundant private variable.
@@ -161,6 +173,7 @@ export class EMImageViewerCanvas2 extends HTMLElement {
     this.limitRight = imageWidth - this.offsetWidth;
     this.limitTop = 0;
     this.limitBottom = imageHeight - this.offsetHeight;
+    this.tileCount = Math.ceil(imageWidth / this.tileWidth) * Math.ceil(imageHeight / this.tileWidth);
   }
 
   /*
@@ -223,7 +236,10 @@ export class EMImageViewerCanvas2 extends HTMLElement {
 
       for (let j = 0; j < tiles.length; j++){
         index++;
-        tiles[j].setAttribute('src', `${this.resourcesUri}${this.imagePrefix}${index}.${this.fileExtension}`);
+
+        if (index <= this.tileCount){
+          tiles[j].setAttribute('src', `${this.resourcesUri}${this.imagePrefix}${index}.${this.fileExtension}`);
+        }
       }
 
       index += leap;
