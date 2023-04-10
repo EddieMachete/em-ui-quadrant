@@ -13,5 +13,5 @@ node_modules/
 *.tgz
 .env
 
-package-lock.json
+build/
 dist/

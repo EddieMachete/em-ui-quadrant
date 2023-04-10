@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes"
+    />
+    <title>em-image-viewer :: Demo</title>
+    <meta name="description" content="em-image-viewer :: Demo" />
+    <!-- Add any global styles for body, document, etc. -->
+    <style>
+      body {
+        font-family: var(--theme-font-family, 'Segoe UI',Arial, sans-serif);
+      }
+
+      em-image-viewer-canvas,
+      em-image-viewer-canvas-2 {
+        height: 280px;
+        width: 360px;
+      }
+    </style>
+    <script>window.process = {env: {NODE_ENV: 'development'} };</script>
+  </head>
+  <body>
+    <noscript>
+      Please enable JavaScript to view this website.
+    </noscript>
+    <h1>em-image-viewer :: Demo</h1>
+    <!-- 2048x1367 -->
+    <em-image-viewer-canvas-2
+        file-extension="jpg"
+        image-height="1367"
+        image-prefix="i_l_"
+        image-width="2048"
+        resources-uri="images/tiles/"
+        tile-width="128"></em-image-viewer-canvas-2>
+    <script type="module" src="scripts/bundle.js"></script>
+
+    <script type="text/javascript">
+      const canvas = this.document.querySelector('em-image-viewer-canvas-2');
+      const tileWidth = 128;
+      const movementDistance = 10; // tileWidth / 3;
+      let x = 0;
+      let y = 0;
+
+      this.document.addEventListener(
+        'keypress',
+        (e) => {
+          // console.log(e.keyCode);
+
+          if (e.keyCode === 52) {
+            x -= movementDistance;
+            canvas.setLocation(x, y);
+            return;
+          }
+
+          if (e.keyCode === 54) {
+            x += movementDistance;
+            canvas.setLocation(x, y);
+            return;
+          }
+
+          if (e.keyCode === 56) {
+            y -= movementDistance;
+            canvas.setLocation(x, y);
+            return;
+          }
+
+          if (e.keyCode === 50) {
+            y += movementDistance;
+            canvas.setLocation(x, y);
+            return;
+          }
+        }
+      );
+    </script>
+  </body>
+</html>
