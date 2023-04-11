@@ -1,6 +1,6 @@
 import { Story, Meta } from '@storybook/web-components';
 import { html } from 'lit-html';
-import './EMImageViewerCanvas2';
+import './EMImageViewerCanvas';
 
 export default {
   title: 'Example/EMImageViewerCanvas',
@@ -13,7 +13,7 @@ export default {
 } as Meta;
 
 const Template: Story = () => html`
-  <em-image-viewer-canvas-2
+  <em-image-viewer-canvas
     file-extension="jpg"
     image-height="1367"
     image-prefix="i_l_"
@@ -21,6 +21,6 @@ const Template: Story = () => html`
     resources-uri="/images/tiles/"
     tile-width="128"
     style="width: 100%; height: 100vh;">
-  </em-image-viewer-canvas-2>`;
+  </em-image-viewer-canvas>`;
 
 export const Primary = Template.bind({});
