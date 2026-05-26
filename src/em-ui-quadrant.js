@@ -6,13 +6,15 @@ const template = document.createElement('template');
 template.innerHTML = `
   <style>
     :host {
-      display: block;
+      display: flex;
+      flex-direction: column;
     }
 
     .canvas-container {
       background-color: #e2e2e2;
       cursor: grab;
       display: flex;
+      flex: 1;
       flex-direction: column;
       min-height: 300px;
       overflow: hidden;

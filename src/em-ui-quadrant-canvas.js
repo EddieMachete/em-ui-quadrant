@@ -4,7 +4,7 @@ const template = document.createElement('template');
 template.innerHTML = `
     <style>
         :host {
-            background-color: aquamarine;
+            background-color: #e2e2e2;
             display: block;
             position: relative;
         }
