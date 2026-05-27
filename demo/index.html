@@ -1,46 +1,125 @@
-<!--
-@license
-Copyright (c) 2015 Rick Hansen Institute. All rights reserved.
-This code may only be used under the modified Apache license found at https://raw.githubusercontent.com/EddieMachete/rhi-core-isncsci-algorithm/master/LICENSE
-Author: RhiTech <tech@rickhanseninstitute.org>
--->
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>em-ui-quadrant :: Demo</title>
-  <link rel="import" href="../../../bower_components/iron-demo-helpers/demo-snippet.html" />
-  <link rel="import" href="../em-ui-quadrant.html" />
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-    }
-    
-    .main-content {
-      margin: 24px;
-    }
-    
-    demo-snippet {
-      margin-top: 24px;
-    }
-  </style>
-</head>
-<body>
-    <div class="main-content">
-        <h3>&lt;em-ui-quadrant&gt;</h3>
-        <demo-snippet>
-            <template>
-                <em-ui-quadrant resources-uri="images/tiles/"
-                                image-prefix="i_l_"
-                                file-extension=".jpg"
-                                image-width="2048"
-                                image-height="1367"></em-ui-quadrant>
-            </template>
-        </demo-snippet>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>em-ui-quadrant :: test page</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 0;
+        padding: 24px;
+        color: #222;
+      }
+
+      h1 {
+        font-size: 1.25rem;
+        margin: 0 0 4px;
+      }
+
+      p {
+        margin: 0 0 16px;
+        color: #555;
+        max-width: 60ch;
+      }
+
+      .controls {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      button {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+        cursor: pointer;
+      }
+
+      button[aria-pressed='true'] {
+        font-weight: 700;
+        border-color: #222;
+      }
+
+      em-ui-quadrant {
+        width: 640px;
+        height: 480px;
+        max-width: 100%;
+        border: 1px solid #999;
+        overflow: hidden;
+        resize: both;
+      }
+
+      .hint {
+        font-size: 0.8rem;
+        color: #777;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>&lt;em-ui-quadrant&gt;</h1>
+    <p>
+      Drag inside the frame to pan the image. Drag the bottom-right corner to
+      resize the viewer. Use the buttons to load a different level of detail.
+    </p>
+
+    <div class="controls" id="controls">
+      <button data-prefix="i_s_" data-width="800" data-height="534">
+        Small
+      </button>
+      <button data-prefix="i_m_" data-width="1024" data-height="684">
+        Medium
+      </button>
+      <button data-prefix="i_l_" data-width="2048" data-height="1367">
+        Large
+      </button>
     </div>
-    <script>
-        /* global */
+
+    <div id="viewer-host"></div>
+
+    <p class="hint">
+      Served from the repo root: run
+      <code>npm install &amp;&amp; npm start</code>
+      and the browser opens here automatically.
+    </p>
+
+    <script type="module">
+      import '../src/em-ui-quadrant.js';
+
+      const host = document.getElementById('viewer-host');
+      const controls = document.getElementById('controls');
+
+      function loadSet(prefix, width, height, button) {
+        host.replaceChildren();
+
+        const viewer = document.createElement('em-ui-quadrant');
+        viewer.setAttribute('resources-uri', 'images/tiles/');
+        viewer.setAttribute('file-extension', '.jpg');
+        viewer.setAttribute('image-prefix', prefix);
+        viewer.setAttribute('image-width', width);
+        viewer.setAttribute('image-height', height);
+        host.appendChild(viewer);
+
+        for (const b of controls.children) {
+          b.setAttribute('aria-pressed', String(b === button));
+        }
+      }
+
+      controls.addEventListener('click', (e) => {
+        const button = e.target.closest('button');
+        if (!button) {
+          return;
+        }
+        loadSet(
+          button.dataset.prefix,
+          button.dataset.width,
+          button.dataset.height,
+          button,
+        );
+      });
+
+      // Start on the large, high-detail tile set.
+      loadSet('i_l_', '2048', '1367', controls.lastElementChild);
     </script>
-</body>
+  </body>
 </html>
